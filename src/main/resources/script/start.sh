@@ -4,20 +4,20 @@ SHELL_PATH=$(cd $(dirname $0); pwd);
 SFTPD_HOME=$(cd $SHELL_PATH/..; pwd)
 SFTPD_MEM_MB=${SFTPD_MEM_MB:-2048}
 
-MAIN_JAR="${SFTPD_HOME}/lib/s3-sftp.jar"
+MAIN_JAR="${SFTPD_HOME}/lib/sftp-s3.jar"
 PIDFILE="${SFTPD_HOME}/log/app.pid"
 
-SFTP_SPRING_ARGS="--spring.config.location=${SFTPD_HOME}/conf/application.properties"
+SFTP_SPRING_ARGS="--spring.config.location=${SFTPD_HOME}/conf/application.yml"
 
 do_run () {
   echo $SFTPD_HOME
   cd ${SFTPD_HOME}
-  exec java -Xms256m -Xmx${SFTPD_MEM_MB}m -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=1024m -Ddbconfigpath=/apps/dbconfig/ -jar ${MAIN_JAR} $SFTP_SPRING_ARGS
+  exec java -Xms256m -Xmx${SFTPD_MEM_MB}m -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=1024m -jar ${MAIN_JAR} $SFTP_SPRING_ARGS
 }
 do_start () {
   echo $SFTPD_HOME
   cd ${SFTPD_HOME}
-  nohup java -Xms256m -Xmx${SFTPD_MEM_MB}m -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=1024m -Ddbconfigpath=/apps/dbconfig/ \
+  nohup java -Xms256m -Xmx${SFTPD_MEM_MB}m -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=1024m \
   -jar ${MAIN_JAR} >${SFTPD_HOME}/log/run.log 2>&1 $SFTP_SPRING_ARGS &
   PID="$!"
   #echo ${PID} >$PIDFILE
