@@ -9,11 +9,10 @@ import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.UserAuth;
-import org.apache.sshd.server.auth.password.PasswordAuthenticator;
 import org.apache.sshd.server.auth.password.UserAuthPasswordFactory;
+import org.apache.sshd.server.auth.pubkey.UserAuthPublicKeyFactory;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.scp.ScpCommandFactory;
-import org.apache.sshd.server.session.ServerSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,23 +56,12 @@ public class StartApplication implements CommandLineRunner {
         sshServer.setCommandFactory(new ScpCommandFactory());
         List<NamedFactory<UserAuth>> userAuthFactories = new ArrayList<NamedFactory<UserAuth>>();
         userAuthFactories.add(new UserAuthPasswordFactory());
+        userAuthFactories.add(new UserAuthPublicKeyFactory());
         sshServer.setUserAuthFactories(userAuthFactories);
-        sshServer.setPasswordAuthenticator(new PasswordAuthenticator() {
 
-            @Override
-            public boolean authenticate(String username, String password, ServerSession session) {
-                Authentication authentication = new UsernamePasswordAuthentication(username, password);
-                try {
-                    User user = userManager.authenticate(authentication);
-                    session.setAttribute(Constants.USE_S3, user.isUseS3());
-                    session.setAttribute(Constants.USER_SESSION_KEY, user);
-                    return true;
-                } catch (Exception e) {
-                    logger.error("user authentication fail", e);
-                    return false;
-                }
-            }
-        });
+        //支持公钥免密登陆和密码登陆两种模式
+        sshServer.setPublickeyAuthenticator(new UserAuthorizedKeysAuthenticator(new File(Constants.AUTHORIZED_KEYS_PATH), userManager));
+        sshServer.setPasswordAuthenticator(new UserPasswordAuthenticator(userManager));
         List<NamedFactory<Command>> namedFactoryList = new ArrayList<NamedFactory<Command>>();
         namedFactoryList.add(new SFTPSubsystemFactory());
         sshServer.setSubsystemFactories(namedFactoryList);

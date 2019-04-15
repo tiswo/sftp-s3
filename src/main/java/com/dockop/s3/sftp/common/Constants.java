@@ -19,4 +19,8 @@ public class Constants {
     public final static AttributeStore.AttributeKey<User> USER_SESSION_KEY = new AttributeStore.AttributeKey<User>();
 
     public final static AttributeStore.AttributeKey<Boolean> USE_S3 = new AttributeStore.AttributeKey<Boolean>();
+
+    public final static String DEFAULT_AUTHORIZED_KEYS_PATH = System.getProperty("user.home") + "/.ssh/authorized_keys";
+
+    public final static String AUTHORIZED_KEYS_PATH = System.getProperty("authorized.keys.path", DEFAULT_AUTHORIZED_KEYS_PATH);
 }

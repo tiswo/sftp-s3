@@ -3,7 +3,7 @@ sftp:
   host-key-provider: '.product/key.pem'
   user-properties: 'user.properties'
   s3:
-    end-point: '10.151.21.13:7480'
+    end-point: 'rgw.ceph:7480'
     protocol: 'HTTP'
 spring:
   datasource:
